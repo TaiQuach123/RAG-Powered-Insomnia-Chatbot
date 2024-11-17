@@ -1,0 +1,18 @@
+--extra-index-url https://download.pytorch.org/whl/cu124
+torch==2.5.1
+python-dotenv
+qdrant-client==1.12.0
+langchain==0.3.4
+langchain-community==0.3.3
+langchain-core==0.3.12
+langchain-groq==0.2.0
+langgraph==0.2.39
+llama-parse==0.5.11
+streamlit
+semantic-chunkers==0.0.10
+
+einops==0.8.0
+FlagEmbedding==1.2.11
+
+#xformers==0.0.28 #'0.0.28.post3'
+#pip install "unsloth[colab-new] @ git+https://github.com/unslothai/unsloth.git"

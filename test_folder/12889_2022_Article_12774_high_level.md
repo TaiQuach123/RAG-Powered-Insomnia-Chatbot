@@ -1,0 +1,3 @@
+# Title: Association of sleep duration and sleep quality with overweight/obesity among adolescents of Bangladesh: a multilevel analysis
+
+## Summary: This study investigates the relationship between sleep duration, sleep quality, and the prevalence of overweight and obesity among adolescents in Bangladesh. Conducted in four schools, the research involved 1,044 participants aged 13 to 17. The findings indicate that reduced sleep duration is significantly associated with higher rates of overweight and obesity, while also showing a correlation with underweight status. The results suggest that adequate sleep may be an important factor in obesity prevention strategies for adolescents.

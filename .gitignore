@@ -1,0 +1,11 @@
+__pycache__/
+.env
+Data
+aliases
+collections
+raft_state.json
+ideas.txt
+res.json
+vectorstore.ipynb
+create_vectorstore.ipynb
+notebooks
