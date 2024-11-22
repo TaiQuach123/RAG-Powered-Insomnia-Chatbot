@@ -14,10 +14,9 @@ from RAGModule.utils import convert_defaultdict
 
 torch.set_grad_enabled(False)
 
-os.makedirs("Data/json_files", exist_ok=True)
-
 parser = argparse.ArgumentParser(description="Prepare Vector Store")
-parser.add_argument("--dir", default="Data/extracted/TÁC HẠI")
+parser.add_argument("--dir", default="./Data/extracted/TÁC HẠI")
+parser.add_argument("--target_dir", default="./Data/json_files/TÁC HẠI")
 args = parser.parse_args()
 
 jina_encoder = JinaV3Encoder()
@@ -35,6 +34,7 @@ passage_adapter_mask = torch.full((1,), passage_task_id, dtype=torch.int32, devi
 model.eval()
 
 if __name__ == "__main__":
+    os.makedirs(args.target_dir, exist_ok=True)
     docs_with_chunks = create_semantic_chunks_from_directory_with_overlap(args.dir, encoder=jina_encoder, min_split_tokens=128, max_split_tokens=768, window_size=10)
 
     jina_encoder._client.to('cpu')
@@ -52,5 +52,5 @@ if __name__ == "__main__":
             indices = values_indices['indices'].tolist()
             
             temp = {'metadata': doc_chunks[i].metadata, 'page_content': doc_chunks[i].page_content, 'dense': dense_embeddings[i].tolist(), 'sparse': {'values': values, 'indices': indices}}
-            with open(os.path.join("Data/json_files", doc_chunks[i].metadata['doc_id'] + '.json'), 'w') as f:
+            with open(os.path.join(args.target_dir, doc_chunks[i].metadata['doc_id'] + '.json'), 'w') as f:
                 json.dump(temp, f)
