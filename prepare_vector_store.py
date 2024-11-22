@@ -42,9 +42,11 @@ if __name__ == "__main__":
     torch.cuda.empty_cache()
 
     for doc_chunks in docs_with_chunks:
+        file_name = doc_chunks[0].metadata['source'].split('/')[-1][:-3]
         chunks = [chunk.page_content for chunk in doc_chunks]
         sparse_embeddings = bge_m3.encode(chunks, batch_size=8, return_dense=False, return_sparse=True, return_colbert_vecs=False)['lexical_weights']
         dense_embeddings = long_late_chunking(model=model, tokenizer=tokenizer, passage_adapter_mask=passage_adapter_mask, chunks=chunks, max_tokens=8192, overlap_size = 2048)
+        res = []
         for i in range(len(doc_chunks)):
             values_indices = convert_defaultdict(sparse_embeddings[i])
             
@@ -52,5 +54,7 @@ if __name__ == "__main__":
             indices = values_indices['indices'].tolist()
             
             temp = {'metadata': doc_chunks[i].metadata, 'page_content': doc_chunks[i].page_content, 'dense': dense_embeddings[i].tolist(), 'sparse': {'values': values, 'indices': indices}}
-            with open(os.path.join(args.target_dir, doc_chunks[i].metadata['doc_id'] + '.json'), 'w') as f:
-                json.dump(temp, f)
+            res.append(temp)
+
+        with open(os.path.join(args.target_dir, file_name + '.json'), 'w') as f:
+            json.dump(res, f)
