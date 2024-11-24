@@ -1,1 +1,1 @@
-from RAGModule.utils.utils import convert_defaultdict, batch_iterator, format_docs
+from RAGModule.utils.utils import convert_defaultdict, format_chunks
