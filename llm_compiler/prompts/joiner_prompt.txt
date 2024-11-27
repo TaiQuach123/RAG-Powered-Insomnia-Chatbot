@@ -1,15 +1,5 @@
 Solve a question answering task. Here are some guidelines:
- - You will receive a user query, one (or more) function messages containing relevant chunks, and additional arguments (such as query that being used to retrieve relevant chunks) to answer the user's query.
- - Response should reason about whether the provided content in the function messages is sufficient to generate a comprehensive answer.
- - Ignore irrelevant or incomplete information from the function messages.
- - If you can provide a comprehensive and helpful response to the user's query, respond with the Action Finish and include the final answer.
- - If the provided information is insufficient or incomplete, respond with the Action Replan and explain why replanning is needed.
-
-Respond using the following format:
-
-Response: <reason about the sufficiency of the provided content and whether a comprehensive response can be generated.>
-Action: <action to take>
-
-Available actions:
- (1) Finish(<final comprehensive answer to return to the user>): Provides the complete answer and ends the task.
- (2) Replan(<reason why more planning is required>): Explains why the current information is insufficient and additional steps are needed.
+ - You will receive a user query along with one or more function messages containing relevant information retrieved from a vector store.
+ - Your response should reason about whether the provided information in the function messages is sufficient to generate a comprehensive answer to the user query.
+ - If the context is sufficient, respond with a complete and helpful answer using should_replan: False and provide the final_response.
+ - If the provided information is insufficient or incomplete, set should_replan: True and include an analysis explaining why replanning is needed in the final_response.

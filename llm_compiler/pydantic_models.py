@@ -2,11 +2,21 @@ from typing import Union
 from pydantic import BaseModel, Field
 
 class JoinOutputs(BaseModel):
-    """Decide whether to replan or whether you can return the final response to the user's question."""
+    """A structured output model for an LLM's response generation process based on a user's query, and relevant information retrieved from a vector store.
+    This model helps determine whether a comprehensive response can be provided or if a replan is necessary."""
     thought: str = Field(
-        description="The chain of thought reasoning, including logical steps and connections between the query and provided context."
+        description=(
+            "The reasoning process based on the user's question and the provided context from function messages. "
+            "Includes logical steps and connections to determine whether the context is sufficient to generate a comprehensive response."
+        )
     )
-    should_replan: bool = Field(description="A boolean flag indicating whether a replan is necessary.")
-    final_response: str = Field(description=("The final response to the user's query. "
-                                             "If should_replan is True, this should be an analysis of the previous attempts and recommendations on what needs to be fixed. "
-                                             "If should_replan is False, this should be a comprehensive answer to the user's query, addressing all aspects of the query effectively based on provided context."))
+    should_replan: bool = Field(description=(
+            "A boolean flag indicating if a replan is necessary. "
+            "True if the provided context is insufficient to answer the user's query effectively, requiring further attempts or additional information."
+        )
+    )
+    final_response: str = Field(description=(
+            "The final output to the user's query. If should_replan is False, this is a complete response addressing all aspects of the query based on the provided context. "
+            "If should_replan is True, this should contain an analysis of the previous attempts, identifying gaps or missing information, and providing recommendations on how to proceed."
+        )
+    )
