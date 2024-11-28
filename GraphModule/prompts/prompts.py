@@ -1,9 +1,11 @@
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
 
-query_analyzer_system_prompt = """You are an intelligent assistant responsible for analyzing a given chat history (context) and a user's query to determine the appropriate action. Based on your analysis:
+query_analyzer_system_prompt = """You are an intelligent assistant responsible for analyzing a given chat history (if exist) and a user's query to determine the appropriate action. Based on your analysis:
 Respond with 'answer' if the context is sufficient to address the query.
-Respond with 'retrieve' if additional information is needed."""
+Respond with 'retrieve' if additional information is needed.
+
+Note that you should only respond with 'answer' when the context is sufficient to address the query. Don't try to answer a query without context."""
 
 query_analyzer_prompt = ChatPromptTemplate.from_messages([
     ("system", query_analyzer_system_prompt),

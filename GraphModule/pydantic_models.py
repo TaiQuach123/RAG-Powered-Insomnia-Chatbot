@@ -17,5 +17,5 @@ class State(TypedDict):
     messages: Annotated[List[BaseMessage], operator.add]
     rewriter_response: RewriterResponse
     query_analysis: QueryAnalysis
-    documents: list
+    documents: str
     llm_compiler_messages: Annotated[List[BaseMessage], operator.add]

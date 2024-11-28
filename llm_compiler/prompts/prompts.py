@@ -13,5 +13,5 @@ llm_compiler_prompt = ChatPromptTemplate([
 
 joiner_prompt = ChatPromptTemplate([
     ("system", joiner_sys_prompt),
-    MessagesPlaceholder(variable_name="messages")
+    MessagesPlaceholder(variable_name="llm_compiler_messages")
 ])

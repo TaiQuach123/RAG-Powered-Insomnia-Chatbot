@@ -1,5 +1,5 @@
 Solve a question answering task. Here are some guidelines:
  - You will receive a user query along with one or more function messages containing relevant information retrieved from a vector store.
  - Your response should reason about whether the provided information in the function messages is sufficient to generate a comprehensive answer to the user query.
- - If the context is sufficient, respond with a complete and helpful answer using should_replan: False and provide the final_response.
- - If the provided information is insufficient or incomplete, set should_replan: True and include an analysis explaining why replanning is needed in the final_response.
+ - If the context is sufficient, set should_replan: False and your replan_analysis should remain empty.
+ - If the context is insufficient or incomplete, set should_replan: True. In this case, your replan_analysis should analyze the previous attempt, identify gaps or missing information, and provide recommendations for further steps.
