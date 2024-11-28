@@ -24,3 +24,5 @@ The plan consists of actions from the following {num_tools} types:
  - While parallelizability can be prioritized where appropriate, step-by-step plans are acceptable for queries requiring sequential handling.
  - Only use the provided action types. If a query cannot be addressed using these, invoke the join action for the next steps.
  - Never introduce new actions other than the ones provided.
+
+{replan}

@@ -23,5 +23,5 @@ def convert_defaultdict(input: dict):
 def format_chunks(chunks):
     res = ''
     for i, chunk in enumerate(chunks):
-        res += f"---Begin Chunk---\nSource: {chunk.metadata['source']}\ndoc_id:{chunk.metadata['doc_id']}\n{chunk.metadata['title']}\n\nContent:\n{chunk.page_content}---End Chunk---\n\n"
+        res += f"---Begin Chunk---\nSource: {chunk.metadata['source']}\ndoc_id:{chunk.metadata['doc_id']}\n{chunk.metadata['title']}\n\nContent:\n{chunk.page_content}\n---End Chunk---\n\n"
     return res
