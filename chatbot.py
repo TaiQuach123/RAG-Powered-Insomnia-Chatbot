@@ -29,11 +29,17 @@ torch.set_grad_enabled(False)
 from dotenv import load_dotenv
 load_dotenv()
 
+if torch.cuda.is_available():
+    device = 'cuda'
+elif torch.backends.mps.is_available():
+    device = 'mps'
+else:
+    device = 'cpu'
 
 if 'client' not in st.session_state:
     st.session_state.client = QdrantClient("http://localhost:6333")
 if 'jina_embeddings' not in st.session_state:
-    st.session_state.jina_embeddings = AutoModel.from_pretrained("jinaai/jina-embeddings-v3", trust_remote_code=True).to('cuda')
+    st.session_state.jina_embeddings = AutoModel.from_pretrained("jinaai/jina-embeddings-v3", trust_remote_code=True).to(device)
 if 'bge_embeddings' not in st.session_state:
     st.session_state.bge_embeddings = BGEM3FlagModel('BAAI/bge-m3', use_fp16=True)
 if 'llm' not in st.session_state:

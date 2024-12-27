@@ -6,7 +6,6 @@ from qdrant_client import QdrantClient, models
 client = QdrantClient("http://localhost:6333")
 
 
-
 if not client.collection_exists(collection_name="vector_store"):
     client.create_collection(
         "vector_store",

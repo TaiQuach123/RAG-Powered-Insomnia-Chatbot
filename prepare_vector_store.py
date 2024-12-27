@@ -14,17 +14,24 @@ from RAGModule.utils import convert_defaultdict
 
 torch.set_grad_enabled(False)
 
+if torch.cuda.is_available():
+    device = 'cuda'
+elif torch.backends.mps.is_available():
+    device = 'mps'
+else:
+    device = 'cpu'
+
+
 parser = argparse.ArgumentParser(description="Prepare Vector Store")
 parser.add_argument("--dir", default="./Data/extracted/TÁC HẠI")
 parser.add_argument("--target_dir", default="./Data/json_files/TÁC HẠI")
 args = parser.parse_args()
 
-jina_encoder = JinaV3Encoder()
+jina_encoder = JinaV3Encoder(device=device)
 bge_m3 = BGEM3FlagModel('BAAI/bge-m3', use_fp16=True)
 
 
 model_name = 'jinaai/jina-embeddings-v3'
-device = 'cuda'
 tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
 model = AutoModel.from_pretrained(model_name, trust_remote_code=True).to(device)
 query_task_id = model._adaptation_map['retrieval.query']
@@ -36,10 +43,6 @@ model.eval()
 if __name__ == "__main__":
     os.makedirs(args.target_dir, exist_ok=True)
     docs_with_chunks = create_semantic_chunks_from_directory_with_overlap(args.dir, encoder=jina_encoder, min_split_tokens=128, max_split_tokens=768, window_size=10)
-
-    jina_encoder._client.to('cpu')
-    jina_encoder = None
-    torch.cuda.empty_cache()
 
     for doc_chunks in docs_with_chunks:
         file_name = doc_chunks[0].metadata['source'].split('/')[-1][:-3]
