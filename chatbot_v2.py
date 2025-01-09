@@ -46,6 +46,8 @@ if 'bge_embeddings' not in st.session_state:
     st.session_state.bge_embeddings = BGEM3FlagModel('BAAI/bge-m3', use_fp16=True)
 if 'llm' not in st.session_state:
     st.session_state.llm = ChatGroq(model="llama-3.1-70b-versatile", temperature=0)
+if 'chat_history' not in st.session_state:
+    st.session_state.chat_history = []
 
 
 retrieve_relevant_chunks = functools.partial(retrieve_relevant_chunks, jina_embedding = st.session_state.jina_embeddings, bge_embedding = st.session_state.bge_embeddings, client = st.session_state.client)
@@ -133,9 +135,18 @@ st.set_page_config(page_title="Insomnia Chatbot", page_icon="🤖")
 st.title("Insomnia Chatbot")
 
 
+for message in st.session_state.chat_history:
+    if isinstance(message, HumanMessage):
+        with st.chat_message("Human"):
+            st.markdown(message.content)
+    else:
+        with st.chat_message("AI"):
+            st.markdown(message.content)
+
 
 query = st.chat_input("Enter Your Query")
 if query:
+    st.session_state.chat_history.append(HumanMessage(content = query))
     with st.chat_message("Human"):
         st.markdown(query)
     
@@ -152,7 +163,9 @@ if query:
 
     for event in st.session_state.graph.stream({"messages": [HumanMessage(content = query)]} if not is_interrupt else None, config=config, stream_mode="values"):
         pass
-
+    
+    ai_response = st.session_state.graph.get_state(config).values['messages'][-1].content
+    st.session_state.chat_history.append(AIMessage(content = ai_response))
     with st.chat_message("AI"):
         st.markdown(st.session_state.graph.get_state(config).values['messages'][-1].content)
 
