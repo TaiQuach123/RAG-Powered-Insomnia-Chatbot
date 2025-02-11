@@ -5,13 +5,19 @@ from pydantic import BaseModel, Field
 
 
 class RewriterResponse(BaseModel):
-    """Response from the rewriter - a LLM that rewrites the user's query based on provided context (chat history)"""
-    response: str = Field(description="The rewritten query or a request for clarification (if the user's query is unclear)")
-    need_clarification: bool = Field(description="Indicates if the rewriter requires clarification from the user to effectively rewrite the user's query.")
+    """Indicates whether the user's query is clear enough for retrieving information from a vector store or if further clarification is necessary."""
+    need_clarification: bool = Field(description=("Determines if the user's query is unclear and requires clarification. "
+                                                  "For instance, if the user asks 'I need help with insomnia' or 'tell me about ...', "
+                                                  " the request lacks specificity, and we don't know what the user is asking for exactly.\n" 
+                                                  "- True if the query is unclear and requires clarification, False if the query is clear and can proceed with rewriting."))
+    response: str = Field(description=("If need_clarification is 'True', this field contains a polite request for the user to clarify their query. "
+                                       "If need_clarification is 'False', this field contains the rewritten query that is ready for retrieving information from a vector store."))
 
 class QueryAnalysis(BaseModel):
-    """Analyzes a query and context to determine the next action for a LLM."""
-    route: str = Field(description="Action route based on query analysis. 'answer' if the query and context are sufficient for a direct response, 'retrieve' if additional information is needed from a vector store.")
+    """Analyzes the user's latest query along with the provided context (if available) to determine the next appropriate action."""
+    route: str = Field(description=("The determined action to take based on the analysis of the query and context.\n"
+                                    "- 'answer' if the context and query provide enough information for a direct response.\n"
+                                    "- 'retrieve' if additional information is required and needs to be fetched from a vector store."))
 
 class State(TypedDict):
     messages: Annotated[List[BaseMessage], operator.add]

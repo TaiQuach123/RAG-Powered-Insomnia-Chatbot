@@ -3,6 +3,7 @@ import functools
 from qdrant_client import QdrantClient
 
 from langchain_groq import ChatGroq
+from langchain_ollama import ChatOllama
 from langgraph.graph import START, END, StateGraph
 from langgraph.checkpoint.memory import MemorySaver
 
@@ -24,10 +25,12 @@ from llm_compiler.pydantic_models import JoinOutputs
 
 import streamlit as st
 
+import time
 torch.set_grad_enabled(False)
 
 from dotenv import load_dotenv
 load_dotenv()
+
 
 if torch.cuda.is_available():
     device = 'cuda'
@@ -36,6 +39,7 @@ elif torch.backends.mps.is_available():
 else:
     device = 'cpu'
 
+
 if 'client' not in st.session_state:
     st.session_state.client = QdrantClient("http://localhost:6333")
 if 'jina_embeddings' not in st.session_state:
@@ -43,7 +47,10 @@ if 'jina_embeddings' not in st.session_state:
 if 'bge_embeddings' not in st.session_state:
     st.session_state.bge_embeddings = BGEM3FlagModel('BAAI/bge-m3', use_fp16=True)
 if 'llm' not in st.session_state:
-    st.session_state.llm = ChatGroq(model="llama-3.1-70b-versatile", temperature=0)
+    st.session_state.llm = ChatGroq(model="llama-3.3-70b-versatile", temperature=0)
+    #st.session_state.llm = ChatOllama(model="llama3.1", temperature=0)
+if 'chat_history' not in st.session_state:
+    st.session_state.chat_history = []
 
 
 retrieve_relevant_chunks = functools.partial(retrieve_relevant_chunks, jina_embedding = st.session_state.jina_embeddings, bge_embedding = st.session_state.bge_embeddings, client = st.session_state.client)
@@ -57,9 +64,9 @@ def retrieve_chunks(query: str) -> str:
 
 tools = [retrieve_chunks]
 
-query_analyzer_chain = query_analyzer_prompt | st.session_state.llm.with_structured_output(QueryAnalysis)
-rewriter_chain = rewriter_prompt | st.session_state.llm.with_structured_output(RewriterResponse)
-responder_chain = responder_prompt | st.session_state.llm
+# query_analyzer_chain = query_analyzer_prompt | st.session_state.ollama.with_structured_output(QueryAnalysis)
+# rewriter_chain = rewriter_prompt | st.session_state.ollama.with_structured_output(RewriterResponse)
+# responder_chain = responder_prompt | st.session_state.llm
 
 planner = create_planner(st.session_state.llm, tools, llm_compiler_prompt)
 runnable = joiner_prompt | st.session_state.llm.with_structured_output(JoinOutputs)
@@ -127,9 +134,24 @@ if 'graph' not in st.session_state:
 config = {"configurable": {"thread_id": 0}}
 is_interrupt = False
 
-st.title("RAG Powered Insomnia Chatbot")
-query = st.text_input("Enter Your Query")
+st.set_page_config(page_title="Insomnia Chatbot", page_icon="🤖")
+st.title("Insomnia Chatbot")
+
+
+for message in st.session_state.chat_history:
+    if isinstance(message, HumanMessage):
+        with st.chat_message("Human"):
+            st.markdown(message.content)
+    else:
+        with st.chat_message("AI"):
+            st.markdown(message.content)
+
+
+query = st.chat_input("Enter Your Query")
 if query:
+    st.session_state.chat_history.append(HumanMessage(content = query))
+    st.chat_message("Human").markdown(query)
+    
     try:
         if st.session_state.graph.get_state(config).next[0] == 'ask_human':
             is_interrupt = True
@@ -139,10 +161,29 @@ if query:
     
     except:
         pass
+    
+    complete_output = ""
+    message_container = st.chat_message("AI")
+    token_output = message_container.empty()
+    for msg, metadata in st.session_state.graph.stream({"messages": [HumanMessage(content = query)]} if not is_interrupt else None, config=config, stream_mode="messages"):
+        if (metadata['langgraph_node'] == 'responder' and msg.content and not isinstance(msg, HumanMessage)):
+            complete_output += msg.content
+            token_output.markdown(complete_output)
+            #print(msg.content, end="|", flush=True)
+            
+    #print(st.session_state.graph.get_state(config).values)
+    ai_response = st.session_state.graph.get_state(config).values['messages'][-1].content
+    #print(ai_response)
+    st.session_state.chat_history.append(AIMessage(content = ai_response))
 
-    for event in st.session_state.graph.stream({"messages": [HumanMessage(content = query)]} if not is_interrupt else None, config=config, stream_mode="values"):
+    try:
+        if st.session_state.graph.get_state(config).next[0] == 'ask_human':
+            token_output.markdown(ai_response)
+    except:
         pass
+    
 
-    st.write(st.session_state.graph.get_state(config).values['messages'][-1].content)
-
-
+    with st.expander("Reference Chunks"):
+        #print(st.session_state.graph.get_state(config).values)
+        documents = st.session_state.graph.get_state(config).values.get('documents', '')
+        st.write(documents)
