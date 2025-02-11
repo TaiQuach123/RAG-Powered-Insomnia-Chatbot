@@ -19,18 +19,18 @@ def retrieve_relevant_chunks(query: str, jina_embedding: AutoModel, bge_embeddin
             models.Prefetch(
                 query = dense[0],
                 using = "dense",
-                limit = 20
+                limit = 10
             ),
             models.Prefetch(
                 query = models.SparseVector(**convert_defaultdict(sparse['lexical_weights'][0])),
                 using = "sparse",
-                limit = 20
+                limit = 10
             )
         ],
         query = models.FusionQuery(
             fusion = models.Fusion.RRF,
         ),
-        limit = 5
+        limit = 3
     )
 
     relevant_chunks = []
